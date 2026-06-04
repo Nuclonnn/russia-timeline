@@ -287,25 +287,19 @@ body {
 }
 
 .timeline-track {
+  --timeline-scale: 1;
   position: relative;
-  display: inline-flex;
-  align-items: stretch;
+  display: inline-block;
   min-width: min-content;
-  height: var(--timeline-node-h);
   padding: 0 4vw;
-  gap: 0;
+  transform: scale(var(--timeline-scale));
+  transform-origin: left center;
+  transition: transform 0.15s ease-out;
+  will-change: transform;
 }
 
 .timeline-line {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: calc(var(--timeline-node-h) / 2);
-  height: 2px;
-  background: var(--line);
-  transform: translateY(-50%);
-  pointer-events: none;
-  z-index: 1;
+  display: none;
 }
 
 .timeline-nodes {
@@ -314,60 +308,121 @@ body {
   gap: clamp(3rem, 8vw, 6rem);
   position: relative;
   height: var(--timeline-node-h);
-  z-index: 2;
+  min-height: var(--timeline-node-h);
 }
 
-/* --- Узел на ленте: точка строго на оси --- */
+/* Линия оси — одна на всю ленту, на уровне 50% узлов */
+.timeline-nodes::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 2px;
+  background: var(--line);
+  transform: translateY(-50%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* --- Узел: точка всегда top 50%, карточки выше/ниже --- */
 .timeline-node {
   position: relative;
   flex-shrink: 0;
   width: clamp(220px, 28vw, 300px);
   height: var(--timeline-node-h);
-  display: grid;
-  grid-template-rows: 1fr auto 1fr;
-  align-items: center;
-  justify-items: center;
 }
 
 .timeline-node:nth-child(odd) .event-card {
-  grid-row: 1;
-  align-self: end;
-  margin: 0 0 0.75rem;
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: calc(50% + 14px);
 }
 
 .timeline-node:nth-child(even) .event-card {
-  grid-row: 3;
-  align-self: start;
-  margin: 0.75rem 0 0;
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(50% + 14px);
 }
 
 .timeline-node__dot {
-  grid-row: 2;
+  position: absolute;
+  top: 50%;
+  left: 50%;
   width: 14px;
   height: 14px;
+  margin: 0;
   border-radius: 50%;
   background: var(--accent);
   box-shadow: 0 0 0 4px var(--accent-soft), 0 0 20px var(--accent-soft);
+  transform: translate(-50%, -50%);
   z-index: 3;
-  margin: 0;
-  transition: transform 0.3s, box-shadow 0.3s;
+  transition: box-shadow 0.3s, width 0.3s, height 0.3s;
 }
 
 .timeline-node.is-active .timeline-node__dot {
-  transform: translateY(0) scale(1.35);
+  width: 18px;
+  height: 18px;
   box-shadow: 0 0 0 6px var(--accent-soft), 0 0 32px rgba(212, 162, 78, 0.6);
 }
 
 .timeline-node__year {
   position: absolute;
-  top: 50%;
+  top: calc(50% + 12px);
   left: 50%;
-  transform: translate(-50%, calc(-50% + 22px));
+  transform: translateX(-50%);
   font-size: 0.75rem;
   font-weight: 600;
   color: var(--text-muted);
   font-variant-numeric: tabular-nums;
   pointer-events: none;
+  z-index: 2;
+}
+
+/* Масштаб ленты */
+.timeline-zoom {
+  position: absolute;
+  right: 0.75rem;
+  top: 0.5rem;
+  z-index: 15;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem;
+  border-radius: 999px;
+  background: rgba(12, 18, 32, 0.82);
+  border: 1px solid rgba(212, 162, 78, 0.3);
+  backdrop-filter: blur(10px);
+}
+
+.timeline-zoom__btn {
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--accent);
+  font-size: 1.1rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.timeline-zoom__btn:hover {
+  background: rgba(212, 162, 78, 0.15);
+}
+
+.timeline-zoom__btn--reset {
+  font-size: 0.95rem;
+}
+
+.timeline-zoom__label {
+  min-width: 2.5rem;
+  text-align: center;
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
 }
 
 /* --- Карточка события --- */
@@ -400,8 +455,15 @@ body {
 }
 
 .timeline-node.is-active .event-card {
-  transform: translateY(-2px);
   box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), 0 0 0 1px var(--accent-soft);
+}
+
+.timeline-node:nth-child(odd).is-active .event-card {
+  bottom: calc(50% + 16px);
+}
+
+.timeline-node:nth-child(even).is-active .event-card {
+  top: calc(50% + 16px);
 }
 
 .event-card__date {
@@ -608,7 +670,63 @@ body {
 /* --- Адаптив --- */
 @media (max-width: 768px) {
   :root {
-    --detail-h: min(55vh, 420px);
+    --detail-h: min(46vh, 340px);
+    --timeline-node-h: 220px;
+  }
+
+  .timeline-wrap {
+    padding-top: 2.75rem;
+  }
+
+  .event-card {
+    padding: 0.7rem 0.85rem;
+  }
+
+  .event-card__title {
+    font-size: 1rem;
+    margin-bottom: 0.35rem;
+  }
+
+  .event-card__summary {
+    font-size: 0.72rem;
+    line-height: 1.4;
+    -webkit-line-clamp: 2;
+  }
+
+  .event-card__date {
+    font-size: 0.72rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .event-card__cta {
+    margin-top: 0.4rem;
+    font-size: 0.68rem;
+  }
+
+  .detail-grid__title {
+    font-size: 1.35rem;
+  }
+
+  .detail-grid__text {
+    font-size: 0.82rem;
+    line-height: 1.55;
+  }
+
+  .detail-sources ul {
+    font-size: 0.75rem;
+  }
+
+  .detail-panel__inner {
+    padding: 1rem 1rem 1.25rem;
+  }
+
+  .timeline-node {
+    width: 200px;
+  }
+
+  .timeline-node:nth-child(even) .event-card {
+    top: calc(50% + 14px);
+    bottom: auto;
   }
 
   .app-header {
@@ -629,23 +747,15 @@ body {
   }
 
   :root {
-    --timeline-node-h: 260px;
-    --detail-h-expanded: min(65vh, 480px);
+    --detail-h-expanded: min(62vh, 440px);
   }
 
   .timeline-track {
-    padding: 0 2rem;
+    padding: 0 1.25rem;
   }
 
-  .timeline-node {
-    width: 240px;
-  }
-
-  /* На мобильном карточки только сверху линии */
-  .timeline-node:nth-child(even) .event-card {
-    grid-row: 1;
-    align-self: end;
-    margin: 0 0 0.75rem;
+  .timeline-zoom__label {
+    display: none;
   }
 
   .detail-grid {

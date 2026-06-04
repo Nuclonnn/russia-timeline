@@ -18,7 +18,16 @@ const eraLabel = $("#era-label");
 const eraTitle = $("#era-title");
 const progressText = $("#progress-text");
 const timelineScroll = $("#timeline-scroll");
+const timelineTrack = $("#timeline-track");
 const timelineNodes = $("#timeline-nodes");
+const zoomLabel = $("#zoom-label");
+
+const SCALE_MIN = 0.55;
+const SCALE_MAX = 1.15;
+const SCALE_STEP = 0.08;
+let timelineScale = 1;
+let pinchStartDistance = 0;
+let pinchStartScale = 1;
 const detailPanel = $("#detail-panel");
 const detailContent = $("#detail-content");
 const btnPrev = $("#btn-prev");
@@ -53,6 +62,60 @@ function bindUI() {
 
   document.addEventListener("keydown", onKeydown);
   timelineScroll.addEventListener("keydown", onKeydown);
+
+  $("#btn-zoom-in").addEventListener("click", () => setTimelineScale(timelineScale + SCALE_STEP));
+  $("#btn-zoom-out").addEventListener("click", () => setTimelineScale(timelineScale - SCALE_STEP));
+  $("#btn-zoom-reset").addEventListener("click", () => setTimelineScale(1));
+
+  timelineScroll.addEventListener(
+    "wheel",
+    (e) => {
+      if (!e.ctrlKey) return;
+      e.preventDefault();
+      setTimelineScale(timelineScale + (e.deltaY < 0 ? SCALE_STEP : -SCALE_STEP));
+    },
+    { passive: false }
+  );
+
+  timelineScroll.addEventListener(
+    "touchstart",
+    (e) => {
+      if (e.touches.length === 2) {
+        pinchStartDistance = touchDistance(e.touches);
+        pinchStartScale = timelineScale;
+      }
+    },
+    { passive: true }
+  );
+
+  timelineScroll.addEventListener(
+    "touchmove",
+    (e) => {
+      if (e.touches.length !== 2 || !pinchStartDistance) return;
+      e.preventDefault();
+      const dist = touchDistance(e.touches);
+      const ratio = dist / pinchStartDistance;
+      setTimelineScale(pinchStartScale * ratio);
+    },
+    { passive: false }
+  );
+
+  timelineScroll.addEventListener("touchend", (e) => {
+    if (e.touches.length < 2) pinchStartDistance = 0;
+  });
+}
+
+function touchDistance(touches) {
+  const dx = touches[0].clientX - touches[1].clientX;
+  const dy = touches[0].clientY - touches[1].clientY;
+  return Math.hypot(dx, dy);
+}
+
+/** Масштаб горизонтальной ленты (кнопки, pinch, Ctrl+колесо) */
+function setTimelineScale(scale) {
+  timelineScale = Math.max(SCALE_MIN, Math.min(SCALE_MAX, Math.round(scale * 100) / 100));
+  timelineTrack.style.setProperty("--timeline-scale", String(timelineScale));
+  if (zoomLabel) zoomLabel.textContent = `${Math.round(timelineScale * 100)}%`;
 }
 
 function openTimeline() {
