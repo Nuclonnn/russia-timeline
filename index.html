@@ -56,6 +56,10 @@
 
     <!-- Панель подробностей -->
     <aside class="detail-panel" id="detail-panel" aria-live="polite">
+      <button type="button" class="detail-panel__expand" id="btn-expand-detail" aria-label="Развернуть панель" title="Поднять панель выше">
+        <span class="detail-panel__expand-icon" aria-hidden="true">▲</span>
+        <span class="detail-panel__expand-label">Выше</span>
+      </button>
       <button type="button" class="detail-panel__close" id="btn-close-detail" aria-label="Свернуть подробности">×</button>
       <div class="detail-panel__inner" id="detail-content"></div>
     </aside>

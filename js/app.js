@@ -49,6 +49,7 @@ function bindUI() {
   btnPrev.addEventListener("click", () => step(-1));
   btnNext.addEventListener("click", () => step(1));
   $("#btn-close-detail").addEventListener("click", closeDetail);
+  $("#btn-expand-detail").addEventListener("click", toggleDetailExpand);
 
   document.addEventListener("keydown", onKeydown);
   timelineScroll.addEventListener("keydown", onKeydown);
@@ -175,6 +176,14 @@ function openDetailPanel() {
 function closeDetail() {
   detailOpen = false;
   detailPanel.classList.remove("is-open");
+}
+
+/** Поднять/опустить панель с подробностями */
+function toggleDetailExpand() {
+  const expanded = detailPanel.classList.toggle("is-expanded");
+  app.classList.toggle("is-detail-expanded", expanded);
+  const label = document.querySelector(".detail-panel__expand-label");
+  if (label) label.textContent = expanded ? "Ниже" : "Выше";
 }
 
 function onKeydown(e) {
