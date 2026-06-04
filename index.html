@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Интерактивная лента времени ключевых событий истории России с 1991 по 2022 год." />
+  <title>Лента времени России · 1991–2022</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <!-- Стартовый экран -->
+  <section id="hero" class="hero" aria-label="Главная">
+    <div class="hero__bg" aria-hidden="true"></div>
+    <div class="hero__content">
+      <p class="hero__eyebrow">История России</p>
+      <h1 class="hero__title">Лента времени</h1>
+      <p class="hero__years">1991 — 2022</p>
+      <p class="hero__desc">23 ключевых события современной истории. Пройдите по ленте, откройте карточки и читайте подробности с источниками.</p>
+      <button type="button" class="btn btn--primary" id="btn-start">Начать путешествие</button>
+    </div>
+    <div class="hero__scroll-hint" aria-hidden="true">
+      <span>↓</span>
+    </div>
+  </section>
+
+  <!-- Основной экран ленты -->
+  <main id="timeline-app" class="app hidden" aria-label="Лента событий">
+    <header class="app-header">
+      <button type="button" class="btn btn--ghost app-header__home" id="btn-home" title="На главную">← Главная</button>
+      <div class="app-header__center">
+        <p class="app-header__era" id="era-label">Эпоха</p>
+        <h2 class="app-header__title" id="era-title">1990-е</h2>
+      </div>
+      <p class="app-header__progress" id="progress-text">1 / 23</p>
+    </header>
+
+    <div class="era-bg" id="era-bg" aria-hidden="true"></div>
+    <div class="era-bg__overlay" aria-hidden="true"></div>
+
+    <!-- Горизонтальная лента -->
+    <div class="timeline-wrap">
+      <button type="button" class="nav-arrow nav-arrow--left" id="btn-prev" aria-label="Предыдущее событие">‹</button>
+
+      <div class="timeline-scroll" id="timeline-scroll" tabindex="0">
+        <div class="timeline-track" id="timeline-track">
+          <div class="timeline-line" aria-hidden="true"></div>
+          <div class="timeline-nodes" id="timeline-nodes"></div>
+        </div>
+      </div>
+
+      <button type="button" class="nav-arrow nav-arrow--right" id="btn-next" aria-label="Следующее событие">›</button>
+    </div>
+
+    <!-- Панель подробностей -->
+    <aside class="detail-panel" id="detail-panel" aria-live="polite">
+      <button type="button" class="detail-panel__close" id="btn-close-detail" aria-label="Свернуть подробности">×</button>
+      <div class="detail-panel__inner" id="detail-content"></div>
+    </aside>
+
+    <p class="hint" id="keyboard-hint">Клавиши ← → · Esc — свернуть описание</p>
+  </main>
+
+  <script src="js/app.js" type="module"></script>
+</body>
+</html>
